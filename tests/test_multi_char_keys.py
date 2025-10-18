@@ -176,7 +176,7 @@ class TestMultiCharJumpOverlay:
             assert isinstance(overlay, JumpOverlay)
 
             # Initially buffer should be empty
-            assert overlay._input_buffer == ""
+            assert overlay.input_buffer == ""
 
             # Press 'a'
             await pilot.press("a")
@@ -184,7 +184,7 @@ class TestMultiCharJumpOverlay:
 
             # Buffer should have 'a', screen should still be visible
             assert isinstance(pilot.app.screen, JumpOverlay)
-            assert pilot.app.screen._input_buffer == "a"
+            assert pilot.app.screen.input_buffer == "a"
 
             # Press 's'
             await pilot.press("s")
@@ -221,7 +221,7 @@ class TestMultiCharJumpOverlay:
 
             # Should still be on overlay
             assert isinstance(pilot.app.screen, JumpOverlay)
-            assert pilot.app.screen._input_buffer == "a"
+            assert pilot.app.screen.input_buffer == "a"
 
     async def test_invalid_sequence_clears_buffer(self):
         """Test that invalid key sequence clears the buffer."""
@@ -247,7 +247,7 @@ class TestMultiCharJumpOverlay:
             await pilot.pause()
 
             # Buffer should be cleared
-            assert pilot.app.screen._input_buffer == ""
+            assert pilot.app.screen.input_buffer == ""
 
             # Should still be on overlay
             assert isinstance(pilot.app.screen, JumpOverlay)
