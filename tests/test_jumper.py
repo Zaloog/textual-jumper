@@ -62,8 +62,9 @@ class TestGetFreeKey:
         """Test getting free key when no keys are in use."""
         jumper = Jumper()
         jumper._overlays = {}
-        free_key = jumper._get_free_key()
-        assert free_key == "a"  # First key in DEFAULT_KEYS
+        available_keys = ["a", "s", "d"]
+        free_key = jumper._get_free_key(available_keys)
+        assert free_key == "a"  # First key in available_keys
 
     def test_get_free_key_some_used(self):
         """Test getting free key when some keys are in use."""
@@ -72,7 +73,8 @@ class TestGetFreeKey:
             Offset(0, 0): JumpInfo("a", "widget1"),
             Offset(1, 1): JumpInfo("s", "widget2"),
         }
-        free_key = jumper._get_free_key()
+        available_keys = ["a", "s", "d", "w"]
+        free_key = jumper._get_free_key(available_keys)
         assert free_key == "d"  # Next available key
 
     def test_get_free_key_all_used(self):
@@ -82,7 +84,8 @@ class TestGetFreeKey:
             Offset(0, 0): JumpInfo("a", "widget1"),
             Offset(1, 1): JumpInfo("b", "widget2"),
         }
-        free_key = jumper._get_free_key()
+        available_keys = ["a", "b"]
+        free_key = jumper._get_free_key(available_keys)
         assert free_key is None
 
     def test_get_free_key_custom_keys(self):
@@ -90,7 +93,8 @@ class TestGetFreeKey:
         custom_keys = ["x", "y", "z"]
         jumper = Jumper(keys=custom_keys)
         jumper._overlays = {Offset(0, 0): JumpInfo("x", "widget1")}
-        free_key = jumper._get_free_key()
+        available_keys = ["x", "y", "z"]
+        free_key = jumper._get_free_key(available_keys)
         assert free_key == "y"
 
 

@@ -234,7 +234,7 @@ class TestIntegration:
             assert pilot.app.input_no_id in widgets
 
     async def test_key_exhaustion_handling(self):
-        """Test behavior when all available keys are exhausted."""
+        """Test behavior when single-char keys run out - should generate multi-char keys."""
 
         class ManyWidgetsApp(App):
             def __init__(self, *args, **kwargs):
@@ -246,7 +246,7 @@ class TestIntegration:
                 yield self.jumper
                 yield Input(id="input1")
                 yield Input(id="input2")
-                yield Input(id="input3")  # This one won't get a key
+                yield Input(id="input3")
 
         app = ManyWidgetsApp()
         async with app.run_test() as pilot:
@@ -256,13 +256,21 @@ class TestIntegration:
 
             overlays = pilot.app.jumper.overlays
 
-            # Only 2 overlays should be created (keys exhausted)
-            # Actually, the third one will get None as key
-            assert len(overlays) <= 3
+            # All 3 should get keys (using multi-char keys when needed)
+            assert len(overlays) == 3
 
-            # Count how many have valid keys
-            valid_keys = [info.key for info in overlays.values() if info.key is not None]
-            assert len(valid_keys) == 2
+            # All keys should be valid
+            keys = [info.key for info in overlays.values()]
+            assert all(key is not None for key in keys)
+
+            # Should have mix of single and multi-char keys
+            single_char = [k for k in keys if len(k) == 1]
+            multi_char = [k for k in keys if len(k) > 1]
+
+            # Should have 1 single-char (half of 2 keys)
+            assert len(single_char) == 1
+            # Should have 2 multi-char
+            assert len(multi_char) == 2
 
     async def test_jump_to_widget_with_key_press(self):
         """Test complete jump workflow: show overlay and jump to widget."""
