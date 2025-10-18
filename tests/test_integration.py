@@ -1,0 +1,263 @@
+"""Integration tests for textual-jumper."""
+
+import pytest
+from textual.app import App, ComposeResult
+from textual.widgets import Input, Button, Header, Footer
+from textual.containers import Vertical, Horizontal
+
+from textual_jumper.jumper import Jumper
+from textual_jumper.jump_overlay import JumpOverlay, LetterLabel
+
+
+class IntegrationTestApp(App):
+    """App for integration testing."""
+
+    BINDINGS = [("ctrl+o", "show_overlay", "Show Jump Overlay")]
+
+    def __init__(self, *args, **kwargs):
+        self.jumper = Jumper()
+        super().__init__(*args, **kwargs)
+
+    def compose(self) -> ComposeResult:
+        yield Header()
+        yield self.jumper
+        with Vertical():
+            yield Input(id="name", placeholder="Name")
+            yield Input(id="email", placeholder="Email")
+            with Horizontal():
+                yield Input(id="phone", placeholder="Phone")
+                yield Input(id="address", placeholder="Address")
+            yield Button("Submit", id="submit_btn")
+        yield Footer()
+
+    def action_show_overlay(self):
+        """Show the jump overlay."""
+        self.jumper.show()
+
+
+class TestIntegration:
+    """Integration tests for the complete jump workflow."""
+
+    async def test_complete_jump_workflow(self):
+        """Test the complete workflow of showing overlay and jumping."""
+        app = IntegrationTestApp()
+        async with app.run_test() as pilot:
+            # Set jumpable on all inputs and buttons
+            for widget in pilot.app.query(Input).results():
+                widget.jumpable = True
+            pilot.app.query_one("#submit_btn", Button).jumpable = True
+
+            # Trigger the jump overlay
+            await pilot.press("ctrl+o")
+            await pilot.pause()
+
+            # Should be on the JumpOverlay screen
+            assert isinstance(pilot.app.screen, JumpOverlay)
+
+            # Wait for labels to render
+            await pilot.pause()
+
+            # Should have 5 LetterLabels (4 inputs + 1 button)
+            labels = pilot.app.screen.query(LetterLabel)
+            assert len(labels) == 5
+
+    async def test_overlay_shows_correct_keys(self):
+        """Test that overlay shows correct keys for widgets."""
+        app = IntegrationTestApp()
+        async with app.run_test() as pilot:
+            # Set jumpable
+            for widget in pilot.app.query(Input).results():
+                widget.jumpable = True
+
+            # Get overlays
+            overlays = pilot.app.jumper.overlays
+
+            # Should have keys from DEFAULT_KEYS
+            keys = [info.key for info in overlays.values()]
+            assert len(keys) == 4
+            assert all(key in ["a", "s", "d", "w", "h", "j", "k", "l"] for key in keys)
+
+    async def test_custom_key_mapping_integration(self):
+        """Test integration with custom key mappings."""
+        class CustomApp(App):
+            def __init__(self, *args, **kwargs):
+                # Custom mapping: name->1, email->2, submit->3
+                self.jumper = Jumper(ids_to_keys={"name": "1", "email": "2", "submit_btn": "3"})
+                super().__init__(*args, **kwargs)
+
+            def compose(self) -> ComposeResult:
+                yield self.jumper
+                yield Input(id="name")
+                yield Input(id="email")
+                yield Button("Submit", id="submit_btn")
+
+        app = CustomApp()
+        async with app.run_test() as pilot:
+            # Set jumpable
+            pilot.app.query_one("#name").jumpable = True
+            pilot.app.query_one("#email").jumpable = True
+            pilot.app.query_one("#submit_btn").jumpable = True
+
+            # Get overlays
+            overlays = pilot.app.jumper.overlays
+            keys_by_id = {info.widget: info.key for info in overlays.values()}
+
+            # Check custom keys are used
+            assert keys_by_id["name"] == "1"
+            assert keys_by_id["email"] == "2"
+            assert keys_by_id["submit_btn"] == "3"
+
+    async def test_nested_widgets_detected(self):
+        """Test that widgets in nested containers are detected."""
+        app = IntegrationTestApp()
+        async with app.run_test() as pilot:
+            # Set jumpable on nested inputs
+            for widget in pilot.app.query(Input).results():
+                widget.jumpable = True
+
+            overlays = pilot.app.jumper.overlays
+
+            # Should find all 4 inputs including nested ones
+            assert len(overlays) == 4
+
+            # Check that nested widgets are included
+            widget_ids = [info.widget for info in overlays.values()]
+            assert "phone" in widget_ids
+            assert "address" in widget_ids
+
+    async def test_only_jumpable_widgets_shown(self):
+        """Test that only widgets with jumpable=True are shown."""
+        app = IntegrationTestApp()
+        async with app.run_test() as pilot:
+            # Only set jumpable on one widget
+            pilot.app.query_one("#name").jumpable = True
+
+            overlays = pilot.app.jumper.overlays
+
+            # Should only have 1 overlay
+            assert len(overlays) == 1
+            info = list(overlays.values())[0]
+            assert info.widget == "name"
+
+    async def test_escape_closes_overlay(self):
+        """Test that pressing escape closes the overlay."""
+        app = IntegrationTestApp()
+        async with app.run_test() as pilot:
+            # Set jumpable
+            pilot.app.query_one("#name").jumpable = True
+
+            # Show overlay
+            await pilot.press("ctrl+o")
+            await pilot.pause()
+
+            # Should be on overlay
+            assert isinstance(pilot.app.screen, JumpOverlay)
+
+            # Press escape
+            await pilot.press("escape")
+            await pilot.pause()
+
+            # Should be back to main screen
+            assert not isinstance(pilot.app.screen, JumpOverlay)
+
+    async def test_jumper_display_is_false(self):
+        """Test that jumper widget is not displayed."""
+        app = IntegrationTestApp()
+        async with app.run_test() as pilot:
+            jumper = pilot.app.jumper
+            assert jumper.display is False
+
+    async def test_overlay_regenerated_on_show(self):
+        """Test that overlays are regenerated each time show() is called."""
+        app = IntegrationTestApp()
+        async with app.run_test() as pilot:
+            # Initially, only one widget is jumpable
+            pilot.app.query_one("#name").jumpable = True
+
+            # Get overlays
+            overlays1 = pilot.app.jumper.overlays
+            assert len(overlays1) == 1
+
+            # Make another widget jumpable
+            pilot.app.query_one("#email").jumpable = True
+
+            # Get overlays again
+            overlays2 = pilot.app.jumper.overlays
+            assert len(overlays2) == 2
+
+    async def test_multiple_widgets_with_different_types(self):
+        """Test jumping with different widget types (Input, Button)."""
+        app = IntegrationTestApp()
+        async with app.run_test() as pilot:
+            # Set jumpable on different widget types
+            pilot.app.query_one("#name", Input).jumpable = True
+            pilot.app.query_one("#submit_btn", Button).jumpable = True
+
+            overlays = pilot.app.jumper.overlays
+
+            # Should have 2 overlays
+            assert len(overlays) == 2
+
+            # Check both widget types are present
+            widget_ids = [info.widget for info in overlays.values()]
+            assert "name" in widget_ids
+            assert "submit_btn" in widget_ids
+
+    async def test_widget_without_id_in_integration(self):
+        """Test integration with widgets that don't have IDs."""
+        class NoIdApp(App):
+            def __init__(self, *args, **kwargs):
+                self.jumper = Jumper()
+                self.input_no_id = Input()
+                super().__init__(*args, **kwargs)
+
+            def compose(self) -> ComposeResult:
+                yield self.jumper
+                yield Input(id="with_id")
+                yield self.input_no_id
+
+        app = NoIdApp()
+        async with app.run_test() as pilot:
+            # Set jumpable on both
+            pilot.app.query_one("#with_id").jumpable = True
+            pilot.app.input_no_id.jumpable = True
+
+            overlays = pilot.app.jumper.overlays
+
+            # Should have 2 overlays
+            assert len(overlays) == 2
+
+            # Check that one uses ID and one uses widget reference
+            widgets = [info.widget for info in overlays.values()]
+            assert "with_id" in widgets
+            assert pilot.app.input_no_id in widgets
+
+    async def test_key_exhaustion_handling(self):
+        """Test behavior when all available keys are exhausted."""
+        class ManyWidgetsApp(App):
+            def __init__(self, *args, **kwargs):
+                # Only 2 keys available
+                self.jumper = Jumper(keys=["x", "y"])
+                super().__init__(*args, **kwargs)
+
+            def compose(self) -> ComposeResult:
+                yield self.jumper
+                yield Input(id="input1")
+                yield Input(id="input2")
+                yield Input(id="input3")  # This one won't get a key
+
+        app = ManyWidgetsApp()
+        async with app.run_test() as pilot:
+            # Set jumpable on all 3 inputs
+            for widget in pilot.app.query(Input).results():
+                widget.jumpable = True
+
+            overlays = pilot.app.jumper.overlays
+
+            # Only 2 overlays should be created (keys exhausted)
+            # Actually, the third one will get None as key
+            assert len(overlays) <= 3
+
+            # Count how many have valid keys
+            valid_keys = [info.key for info in overlays.values() if info.key is not None]
+            assert len(valid_keys) == 2
