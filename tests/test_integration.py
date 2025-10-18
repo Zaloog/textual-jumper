@@ -1,12 +1,11 @@
 """Integration tests for textual-jumper."""
 
-import pytest
 from textual.app import App, ComposeResult
-from textual.widgets import Input, Button, Header, Footer
-from textual.containers import Vertical, Horizontal
+from textual.containers import Horizontal, Vertical
+from textual.widgets import Button, Footer, Header, Input
 
-from textual_jumper.jumper import Jumper
 from textual_jumper.jump_overlay import JumpOverlay, LetterLabel
+from textual_jumper.jumper import Jumper
 
 
 class IntegrationTestApp(App):
@@ -79,6 +78,7 @@ class TestIntegration:
 
     async def test_custom_key_mapping_integration(self):
         """Test integration with custom key mappings."""
+
         class CustomApp(App):
             def __init__(self, *args, **kwargs):
                 # Custom mapping: name->1, email->2, submit->3
@@ -205,6 +205,7 @@ class TestIntegration:
 
     async def test_widget_without_id_in_integration(self):
         """Test integration with widgets that don't have IDs."""
+
         class NoIdApp(App):
             def __init__(self, *args, **kwargs):
                 self.jumper = Jumper()
@@ -234,6 +235,7 @@ class TestIntegration:
 
     async def test_key_exhaustion_handling(self):
         """Test behavior when all available keys are exhausted."""
+
         class ManyWidgetsApp(App):
             def __init__(self, *args, **kwargs):
                 # Only 2 keys available
@@ -261,3 +263,86 @@ class TestIntegration:
             # Count how many have valid keys
             valid_keys = [info.key for info in overlays.values() if info.key is not None]
             assert len(valid_keys) == 2
+
+    async def test_jump_to_widget_with_key_press(self):
+        """Test complete jump workflow: show overlay and jump to widget."""
+        app = IntegrationTestApp()
+        async with app.run_test() as pilot:
+            # Set jumpable
+            pilot.app.query_one("#name").jumpable = True
+            pilot.app.query_one("#email").jumpable = True
+            pilot.app.query_one("#phone").jumpable = True
+
+            # Show overlay
+            await pilot.press("ctrl+o")
+            await pilot.pause()
+
+            # Should be on overlay
+            assert isinstance(pilot.app.screen, JumpOverlay)
+
+            # Get the key for the email field
+            overlays = pilot.app.jumper.overlays
+            email_key = None
+            for info in overlays.values():
+                if info.widget == "email":
+                    email_key = info.key
+                    break
+
+            assert email_key is not None
+
+            # Press that key
+            await pilot.press(email_key)
+            await pilot.pause()
+
+            # Should have dismissed overlay and focused email
+            assert not isinstance(pilot.app.screen, JumpOverlay)
+            assert pilot.app.focused.id == "email"
+
+    async def test_jump_cancellation_with_escape(self):
+        """Test that escape cancels without jumping."""
+        app = IntegrationTestApp()
+        async with app.run_test() as pilot:
+            # Set jumpable
+            pilot.app.query_one("#name").jumpable = True
+
+            # Focus name initially
+            pilot.app.query_one("#name").focus()
+            await pilot.pause()
+
+            # Show overlay
+            await pilot.press("ctrl+o")
+            await pilot.pause()
+
+            # Should be on overlay
+            assert isinstance(pilot.app.screen, JumpOverlay)
+
+            # Press escape to cancel
+            await pilot.press("escape")
+            await pilot.pause()
+
+            # Should have dismissed but still focused on name
+            assert not isinstance(pilot.app.screen, JumpOverlay)
+            # Focus should remain on the originally focused widget
+            assert pilot.app.focused.id == "name"
+
+    async def test_jump_with_button_widget(self):
+        """Test jumping to a button widget."""
+        app = IntegrationTestApp()
+        async with app.run_test() as pilot:
+            # Only make button jumpable
+            pilot.app.query_one("#submit_btn").jumpable = True
+
+            # Show overlay
+            await pilot.press("ctrl+o")
+            await pilot.pause()
+
+            # Get button's jump key
+            overlays = pilot.app.jumper.overlays
+            button_key = list(overlays.values())[0].key
+
+            # Press that key
+            await pilot.press(button_key)
+            await pilot.pause()
+
+            # Should focus the button
+            assert pilot.app.focused.id == "submit_btn"

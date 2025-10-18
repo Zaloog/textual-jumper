@@ -3,9 +3,9 @@
 import pytest
 from textual.app import App, ComposeResult
 from textual.geometry import Offset
-from textual.widgets import Input, Button, Label
+from textual.widgets import Button, Input, Label
 
-from textual_jumper.jumper import Jumper, JumpInfo, DEFAULT_KEYS
+from textual_jumper.jumper import DEFAULT_KEYS, Jumper, JumpInfo
 
 
 class MockApp(App):
@@ -153,7 +153,11 @@ class TestGetOverlays:
             jumper = pilot.app.jumper
 
             # Set jumpable attribute
-            for widget in [pilot.app.query_one("#input1"), pilot.app.query_one("#input2"), pilot.app.query_one("#button1")]:
+            for widget in [
+                pilot.app.query_one("#input1"),
+                pilot.app.query_one("#input2"),
+                pilot.app.query_one("#button1"),
+            ]:
                 widget.jumpable = True
 
             jumper.get_overlays()
@@ -202,6 +206,7 @@ class TestGetOverlays:
 
     async def test_get_overlays_widget_without_id(self):
         """Test get_overlays handles widgets without IDs."""
+
         class NoIdApp(App):
             def compose(self) -> ComposeResult:
                 self.jumper = Jumper()

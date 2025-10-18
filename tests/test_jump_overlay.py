@@ -1,12 +1,11 @@
 """Tests for JumpOverlay and LetterLabel widgets."""
 
-import pytest
 from textual.app import App, ComposeResult
 from textual.geometry import Offset
 from textual.widgets import Input
 
-from textual_jumper.jumper import JumpInfo
 from textual_jumper.jump_overlay import JumpOverlay, LetterLabel
+from textual_jumper.jumper import JumpInfo
 
 
 class TestLetterLabel:
@@ -19,7 +18,6 @@ class TestLetterLabel:
 
     def test_letter_label_has_default_css(self):
         """Test LetterLabel has default CSS styling."""
-        label = LetterLabel("a")
         # Check that DEFAULT_CSS is defined
         assert hasattr(LetterLabel, "DEFAULT_CSS")
         assert "LetterLabel" in LetterLabel.DEFAULT_CSS
@@ -28,6 +26,7 @@ class TestLetterLabel:
 
     async def test_letter_label_renders(self):
         """Test LetterLabel renders in an app."""
+
         class TestApp(App):
             def compose(self) -> ComposeResult:
                 yield LetterLabel("x")
@@ -39,6 +38,7 @@ class TestLetterLabel:
 
     async def test_letter_label_offset(self):
         """Test LetterLabel can have offset set."""
+
         class TestApp(App):
             def compose(self) -> ComposeResult:
                 label = LetterLabel("a")
@@ -234,3 +234,109 @@ class TestJumpOverlay:
             # Check all keys are present
             label_texts = {str(label.render()) for label in labels}
             assert label_texts == {"q", "w", "e", "r"}
+
+    async def test_jump_overlay_key_press_jumps_to_widget(self):
+        """Test pressing a jump key focuses the corresponding widget."""
+        overlays = {
+            Offset(0, 0): JumpInfo("a", "widget1"),
+            Offset(10, 10): JumpInfo("s", "widget2"),
+        }
+
+        class TestApp(App):
+            def compose(self) -> ComposeResult:
+                yield Input(id="widget1")
+                yield Input(id="widget2")
+
+            def on_mount(self):
+                self.push_screen(JumpOverlay(overlays), self.set_focus)
+
+        app = TestApp()
+        async with app.run_test() as pilot:
+            # Should be on overlay screen
+            assert isinstance(pilot.app.screen, JumpOverlay)
+
+            # Press the jump key
+            await pilot.press("a")
+            await pilot.pause()
+
+            # Should have dismissed and focused widget1
+            assert not isinstance(pilot.app.screen, JumpOverlay)
+            assert pilot.app.focused.id == "widget1"
+
+    async def test_jump_overlay_invalid_key_does_nothing(self):
+        """Test pressing an invalid key doesn't dismiss the overlay."""
+        overlays = {
+            Offset(0, 0): JumpInfo("a", "widget1"),
+        }
+
+        class TestApp(App):
+            def compose(self) -> ComposeResult:
+                yield Input(id="widget1")
+
+            def on_mount(self):
+                self.push_screen(JumpOverlay(overlays))
+
+        app = TestApp()
+        async with app.run_test() as pilot:
+            # Should be on overlay screen
+            assert isinstance(pilot.app.screen, JumpOverlay)
+
+            # Press an invalid key
+            await pilot.press("x")
+            await pilot.pause()
+
+            # Should still be on overlay screen
+            assert isinstance(pilot.app.screen, JumpOverlay)
+
+    async def test_jump_overlay_key_press_with_direct_widget_reference(self):
+        """Test jumping with direct widget reference instead of ID."""
+
+        class TestApp(App):
+            def __init__(self, *args, **kwargs):
+                self.input_widget = Input()
+                super().__init__(*args, **kwargs)
+
+            def compose(self) -> ComposeResult:
+                yield self.input_widget
+
+            def on_mount(self):
+                overlays = {
+                    Offset(0, 0): JumpInfo("a", self.input_widget),
+                }
+                self.push_screen(JumpOverlay(overlays), self.set_focus)
+
+        app = TestApp()
+        async with app.run_test() as pilot:
+            # Press the jump key
+            await pilot.press("a")
+            await pilot.pause()
+
+            # Should have dismissed and focused the widget
+            assert not isinstance(pilot.app.screen, JumpOverlay)
+            assert pilot.app.focused == pilot.app.input_widget
+
+    async def test_jump_overlay_multiple_keys_correct_widget(self):
+        """Test that pressing different keys jumps to correct widgets."""
+        overlays = {
+            Offset(0, 0): JumpInfo("a", "first"),
+            Offset(10, 10): JumpInfo("s", "second"),
+            Offset(20, 20): JumpInfo("d", "third"),
+        }
+
+        class TestApp(App):
+            def compose(self) -> ComposeResult:
+                yield Input(id="first")
+                yield Input(id="second")
+                yield Input(id="third")
+
+            def on_mount(self):
+                self.push_screen(JumpOverlay(overlays), self.set_focus)
+
+        app = TestApp()
+        async with app.run_test() as pilot:
+            # Press key for second widget
+            await pilot.press("s")
+            await pilot.pause()
+
+            # Should focus the second widget
+            assert pilot.app.focused.id == "second"

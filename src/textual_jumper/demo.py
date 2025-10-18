@@ -1,7 +1,7 @@
-from textual.app import App
-from textual.widgets import Input, Footer, Header, Static, TextArea
-from textual.containers import Vertical, Horizontal, VerticalScroll
+from textual.app import App, ComposeResult
 from textual.binding import Binding
+from textual.containers import Horizontal, Vertical, VerticalScroll
+from textual.widgets import Footer, Header, Input, Static, TextArea
 
 from textual_jumper import Jumper
 
@@ -9,9 +9,7 @@ from textual_jumper import Jumper
 class DemoJumpApp(App):
     """A demo application showcasing the Jumper widget functionality."""
 
-    BINDINGS = [
-        Binding("ctrl+o", "show_overlay", "Jump")
-    ]
+    BINDINGS = [Binding("ctrl+o", "show_overlay", "Jump")]
     CSS = """
     #content {
         height: 100%;
@@ -53,7 +51,7 @@ class DemoJumpApp(App):
     }
     """
 
-    def compose(self):
+    def compose(self) -> ComposeResult:
         """Compose the demo app layout.
 
         Yields:
@@ -64,11 +62,10 @@ class DemoJumpApp(App):
         self.jumper = Jumper()
         yield self.jumper
 
-
         with VerticalScroll(id="content"):
             with Vertical(id="info"):
-                yield Static("🎯 Jumper Demo - Press [b]Ctrl+J[/b] to activate jump mode")
-                yield Static("Use [b]Q[/b] to quit")
+                yield Static("🎯 Jumper Demo - Press [b]Ctrl+O[/b] to activate jump mode")
+                yield Static("Then press a letter key to jump to that widget, or [b]Escape[/b] to cancel")
 
             with Vertical(classes="section"):
                 yield Static("Personal Information", classes="section-title")
@@ -117,12 +114,10 @@ class DemoJumpApp(App):
                 notes.jumpable = True  # type: ignore
                 yield notes
 
-    def action_show_overlay(self):
+    def action_show_overlay(self) -> None:
         self.jumper.show()
 
-def main():
+
+def main() -> None:
     app = DemoJumpApp()
     app.run()
-        
-
-
