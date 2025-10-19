@@ -127,4 +127,16 @@ jumper = Jumper(keys=["a", "s", "d", "f", "j", "k", "l", ";"])
 Inspired by Darren Burns jump functionality in [Posting].
 Built with Textual by Textualize.io.
 
+
+## Feedback and Issues
+Feel free to reach out and share your feedback, or open an [Issue],
+if something doesn't work as expected.
+Also check the [Changelog] for new updates.
+
+
+<!-- Repo Links -->
+[Changelog]: https://github.com/Zaloog/textual-jumper/blob/main/CHANGELOG.md
+[Issue]: https://github.com/Zaloog/textual-jumper/issues
+
 [Posting]: https://github.com/darrenburns/posting
+[Issues]:
