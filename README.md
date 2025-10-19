@@ -130,7 +130,7 @@ uv sync --extra dev
 uv run pre-commit install
 
 # Run tests
-uv run pytest tests/ -v
+uv run pytest
 
 # Run linting
 uv run pre-commit run --all-files

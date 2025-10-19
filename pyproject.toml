@@ -38,6 +38,7 @@ Issues = "https://github.com/zaloog/textual-jumper/issues"
 dev = [
     "pytest>=8.0.0",
     "pytest-asyncio>=0.23.0",
+    "pytest-cov>=6.0.0",
     "pre-commit>=4.0.0",
     "ruff>=0.8.0",
     "mypy>=1.13.0",
@@ -50,6 +51,20 @@ textual-jumper = "textual_jumper.demo:main"
 testpaths = ["tests"]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
+addopts = [
+    "-v",
+    "--cov=src/textual_jumper",
+    "--cov-report=term-missing",
+]
+
+[tool.coverage.run]
+omit = ["src/textual_jumper/demo.py"]
+
+[tool.coverage.report]
+exclude_also = [
+    "if TYPE_CHECKING:",
+    "if __name__ == .__main__.:",
+]
 
 [tool.ruff]
 line-length = 120

@@ -340,3 +340,56 @@ class TestJumpOverlay:
 
             # Should focus the second widget
             assert pilot.app.focused.id == "second"
+
+    async def test_jump_overlay_non_character_key_ignored(self):
+        """Test that non-character keys (like arrows, F-keys) are ignored."""
+        overlays = {
+            Offset(0, 0): JumpInfo("a", "widget1"),
+        }
+
+        class TestApp(App):
+            def compose(self) -> ComposeResult:
+                yield Input(id="widget1")
+
+            def on_mount(self):
+                self.push_screen(JumpOverlay(overlays))
+
+        app = TestApp()
+        async with app.run_test() as pilot:
+            overlay = pilot.app.screen
+            assert isinstance(overlay, JumpOverlay)
+
+            # Press a non-character key (arrow key)
+            await pilot.press("up")
+            await pilot.pause()
+
+            # Buffer should remain empty
+            assert overlay.input_buffer == ""
+
+            # Should still be on overlay screen
+            assert isinstance(pilot.app.screen, JumpOverlay)
+
+    async def test_jump_overlay_widget_not_found(self):
+        """Test that jumping to a non-existent widget ID dismisses overlay gracefully."""
+        overlays = {
+            Offset(0, 0): JumpInfo("a", "nonexistent_widget"),
+        }
+
+        class TestApp(App):
+            def compose(self) -> ComposeResult:
+                yield Input(id="widget1")
+
+            def on_mount(self):
+                self.push_screen(JumpOverlay(overlays))
+
+        app = TestApp()
+        async with app.run_test() as pilot:
+            # Should be on overlay screen
+            assert isinstance(pilot.app.screen, JumpOverlay)
+
+            # Press the jump key for non-existent widget
+            await pilot.press("a")
+            await pilot.pause()
+
+            # Should have dismissed the overlay (graceful handling)
+            assert not isinstance(pilot.app.screen, JumpOverlay)
