@@ -1,12 +1,12 @@
 [project]
 name = "textual-jumper"
 version = "0.1.0"
-description = "Add your description here"
+description = "A keyboard-driven navigation widget for Textual TUI applications"
 readme = "README.md"
 authors = [
     { name = "Zaloog", email = "gramslars@gmail.com" }
 ]
-requires-python = ">=3.13"
+requires-python = ">=3.10"
 dependencies = [
     "textual>=6.3.0",
 ]
@@ -30,7 +30,7 @@ asyncio_default_fixture_loop_scope = "function"
 
 [tool.ruff]
 line-length = 120
-target-version = "py313"
+target-version = "py310"
 
 [tool.ruff.lint]
 select = [
@@ -50,7 +50,7 @@ ignore = [
 known-first-party = ["textual_jumper"]
 
 [tool.mypy]
-python_version = "3.13"
+python_version = "3.10"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true

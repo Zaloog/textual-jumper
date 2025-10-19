@@ -37,15 +37,15 @@ class LetterLabel(Label):
         super().__init__("", *args, **kwargs)
 
     def render(self) -> Text:
-        """Render the label with typed characters in grey."""
+        """Render the label with typed characters in heavily dimmed grey."""
         result = Text()
 
         # Determine how many characters match the input buffer
         typed_len = len(self.input_buffer) if self.key_text.startswith(self.input_buffer) else 0
 
-        # Render typed characters in grey
+        # Render typed characters in heavily dimmed grey
         if typed_len > 0:
-            result.append(self.key_text[:typed_len], style="dim")
+            result.append(self.key_text[:typed_len], style="dim #666666")
 
         # Render remaining characters in black (normal)
         if typed_len < len(self.key_text):
