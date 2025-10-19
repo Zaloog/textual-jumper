@@ -136,6 +136,17 @@ uv run pytest
 uv run pre-commit run --all-files
 ```
 
+## Publishing
+
+The package is automatically published to PyPI when a new release is created on GitHub:
+
+1. Update version in `pyproject.toml`
+2. Create a new tag: `git tag v0.1.0 && git push origin v0.1.0`
+3. Create a GitHub release from the tag
+4. The publish workflow will automatically build and upload to PyPI
+
+Note: PyPI publishing uses [Trusted Publishers](https://docs.pypi.org/trusted-publishers/) (no API token needed). Configure this in your PyPI project settings before the first release.
+
 ## License
 
 MIT License
