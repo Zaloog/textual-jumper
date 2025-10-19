@@ -35,8 +35,8 @@ jobs:
       - name: Run ruff
         run: uv run ruff check .
 
-      # - name: Run mypy
-      #   run: uv run mypy .
+      - name: Run mypy
+        run: uv run mypy .
 
   tests:
     needs: lint  # << This ensures tests only run if lint passes
@@ -73,13 +73,13 @@ jobs:
 
         # Generate Coverage
       - name: Generate coverage report
-        run: uv run coverage lcov -o coverage.lcov
+        run: uv run -p ${{matrix.python-version}} coverage lcov -o coverage.lcov
       - name: Upload partial coverage report
         uses: coverallsapp/github-action@v2
         with:
           path-to-lcov: coverage.lcov
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          flag-name: ${{ matrix.platform }} - py${{ matrix.python }}
+          flag-name: ${{ matrix.platform }} - py${{ matrix.python-version }}
           parallel: true
 
   finalize_coverage:
