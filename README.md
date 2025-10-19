@@ -9,7 +9,7 @@
 # Textual Jumper
 
 A keyboard-driven navigation widget for Textual TUI applications. Jump to any focusable widget instantly using intuitive keyboard shortcuts!
-> Note: This created with claude code
+> Note: This was created with Claude Code
 
 
 ## Features
@@ -122,36 +122,9 @@ jumper = Jumper(ids_to_keys={
 jumper = Jumper(keys=["a", "s", "d", "f", "j", "k", "l", ";"])
 ```
 
-## Requirements
-
-- Python 3.10+
-- Textual 6.3.0+
-
-## Development
-
-```bash
-# Clone repository
-git clone https://github.com/zaloog/textual-jumper.git
-cd textual-jumper
-
-# Install with dev dependencies
-uv sync --extra dev
-
-# Install pre-commit hooks
-uv run pre-commit install
-
-# Run tests
-uv run pytest
-
-# Run linting
-uv run pre-commit run --all-files
-```
-
-## License
-
-MIT License
-
 ## Acknowledgments
 
-Inspired by Vim's EasyMotion plugin.
+Inspired by Darren Burns jump functionality in [Posting].
 Built with Textual by Textualize.io.
+
+[Posting]: https://github.com/darrenburns/posting
