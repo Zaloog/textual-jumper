@@ -1,8 +1,19 @@
+<!-- Icons -->
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![PyPI-Server](https://img.shields.io/pypi/v/textual-jumper.svg)](https://pypi.org/project/textual-jumper/)
+[![Pyversions](https://img.shields.io/pypi/pyversions/textual-jumper.svg)](https://pypi.python.org/pypi/textual-jumper)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Downloads](https://static.pepy.tech/badge/textual-jumper)](https://pepy.tech/project/textual-jumper)
+[![Coverage Status](https://coveralls.io/repos/github/Zaloog/textual-jumper/badge.svg?branch=main)](https://coveralls.io/github/Zaloog/textual-jumper?branch=main)
+
 # Textual Jumper
 
 A keyboard-driven navigation widget for Textual TUI applications. Jump to any focusable widget instantly using intuitive keyboard shortcuts!
+> Note: This created with claude code
+
 
 ## Features
+![cover_image](https://raw.githubusercontent.com/Zaloog/textual-jumper/main/docs/images/cover_image.png)
 
 - Instant Navigation - Jump to any widget with 1-2 keystrokes
 - Multi-Character Keys - Automatically generates key combinations for many widgets
@@ -136,17 +147,6 @@ uv run pytest
 uv run pre-commit run --all-files
 ```
 
-## Publishing
-
-The package is automatically published to PyPI when a new release is created on GitHub:
-
-1. Update version in `pyproject.toml`
-2. Create a new tag: `git tag v0.1.0 && git push origin v0.1.0`
-3. Create a GitHub release from the tag
-4. The publish workflow will automatically build and upload to PyPI
-
-Note: PyPI publishing uses [Trusted Publishers](https://docs.pypi.org/trusted-publishers/) (no API token needed). Configure this in your PyPI project settings before the first release.
-
 ## License
 
 MIT License
@@ -155,4 +155,3 @@ MIT License
 
 Inspired by Vim's EasyMotion plugin.
 Built with Textual by Textualize.io.
-Created with Claude Code.
