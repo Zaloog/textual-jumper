@@ -6,10 +6,33 @@ readme = "README.md"
 authors = [
     { name = "Zaloog", email = "gramslars@gmail.com" }
 ]
+license = { text = "MIT" }
 requires-python = ">=3.10"
+keywords = ["textual", "tui", "terminal", "navigation", "keyboard", "vim", "easymotion"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: User Interfaces",
+    "Topic :: Terminals",
+    "Typing :: Typed",
+]
 dependencies = [
     "textual>=6.3.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/zaloog/textual-jumper"
+Repository = "https://github.com/zaloog/textual-jumper"
+Issues = "https://github.com/zaloog/textual-jumper/issues"
 
 [project.optional-dependencies]
 dev = [

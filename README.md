@@ -25,6 +25,16 @@ Using pip:
 pip install textual-jumper
 ```
 
+## Try the Demo
+
+Run the interactive demo to see Textual Jumper in action:
+
+```bash
+uvx textual-jumper
+```
+
+Press `Ctrl+O` to activate jump mode, then press a key to jump to that widget!
+
 ## Quick Start
 
 ```python
@@ -134,3 +144,4 @@ MIT License
 
 Inspired by Vim's EasyMotion plugin.
 Built with Textual by Textualize.io.
+Created with Claude Code.
