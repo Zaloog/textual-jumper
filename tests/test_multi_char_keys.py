@@ -101,7 +101,7 @@ class TestMultiCharKeyAllocation:
         async with app.run_test() as pilot:
             # Set all as jumpable
             for widget in pilot.app.query(Input).results():
-                widget.jumpable = True  # type: ignore
+                widget.jump_mode = "focus"  # type: ignore
 
             overlays = pilot.app.jumper.overlays
 
@@ -139,7 +139,7 @@ class TestMultiCharKeyAllocation:
         app = CustomKeyApp()
         async with app.run_test() as pilot:
             for widget in pilot.app.query(Input).results():
-                widget.jumpable = True  # type: ignore
+                widget.jump_mode = "focus"  # type: ignore
 
             overlays = pilot.app.jumper.overlays
             keys_by_id = {info.widget: info.key for info in overlays.values()}
@@ -167,7 +167,7 @@ class TestMultiCharJumpOverlay:
 
                 from textual_jumper.jumper import JumpInfo
 
-                overlays = {Offset(0, 0): JumpInfo("as", "widget1")}
+                overlays = {Offset(0, 0): JumpInfo("as", "widget1", "focus")}
                 self.push_screen(JumpOverlay(overlays), self.set_focus)
 
         app = TestApp()
@@ -208,8 +208,8 @@ class TestMultiCharJumpOverlay:
                 from textual_jumper.jumper import JumpInfo
 
                 overlays = {
-                    Offset(0, 0): JumpInfo("aa", "widget1"),
-                    Offset(10, 10): JumpInfo("as", "widget2"),
+                    Offset(0, 0): JumpInfo("aa", "widget1", "focus"),
+                    Offset(10, 10): JumpInfo("as", "widget2", "focus"),
                 }
                 self.push_screen(JumpOverlay(overlays), self.set_focus)
 
@@ -235,7 +235,7 @@ class TestMultiCharJumpOverlay:
 
                 from textual_jumper.jumper import JumpInfo
 
-                overlays = {Offset(0, 0): JumpInfo("as", "widget1")}
+                overlays = {Offset(0, 0): JumpInfo("as", "widget1", "focus")}
                 self.push_screen(JumpOverlay(overlays), self.set_focus)
 
         app = TestApp()
@@ -266,8 +266,8 @@ class TestMultiCharJumpOverlay:
                 from textual_jumper.jumper import JumpInfo
 
                 overlays = {
-                    Offset(0, 0): JumpInfo("aa", "widget1"),
-                    Offset(10, 10): JumpInfo("sd", "widget2"),
+                    Offset(0, 0): JumpInfo("aa", "widget1", "focus"),
+                    Offset(10, 10): JumpInfo("sd", "widget2", "focus"),
                 }
                 self.push_screen(JumpOverlay(overlays))
 

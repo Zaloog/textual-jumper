@@ -1,4 +1,4 @@
-from typing import Any, NamedTuple
+from typing import Any, Literal, NamedTuple
 
 from textual.errors import NoWidget
 from textual.geometry import Offset
@@ -15,6 +15,9 @@ class JumpInfo(NamedTuple):
 
     widget: str | Widget
     """Either the ID or a direct reference to the widget."""
+
+    jump_mode: Literal["focus", "click"] | None
+    """The jump mode: 'focus' or 'click'."""
 
 
 DEFAULT_KEYS = ["a", "s", "d", "w", "h", "j", "k", "l"]
@@ -114,9 +117,9 @@ class Jumper(Widget):
             except NoWidget:
                 continue
 
-            has_attribute_and_jumpable = getattr(child, "jumpable", False)
+            jump_mode = getattr(child, "jump_mode", None)
             can_focus = child.can_focus
-            if not all((can_focus, has_attribute_and_jumpable)):
+            if not jump_mode or jump_mode not in ("focus", "click") or not can_focus:
                 continue
 
             widget_offset = Offset(widget_x, widget_y)
@@ -132,11 +135,13 @@ class Jumper(Widget):
 
         # Second pass: assign keys to widgets
         for widget_offset, child in jumpable_widgets:
+            jump_mode = getattr(child, "jump_mode", "focus")
             if child.id and child.id in ids_to_keys:
                 # Use custom key mapping
                 self._overlays[widget_offset] = JumpInfo(
                     ids_to_keys[child.id],
                     child.id,
+                    jump_mode,
                 )
             else:
                 # Use auto-generated key
@@ -145,6 +150,7 @@ class Jumper(Widget):
                     self._overlays[widget_offset] = JumpInfo(
                         free_key,
                         child.id or child,
+                        jump_mode,
                     )
 
         return self._overlays

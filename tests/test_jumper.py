@@ -70,8 +70,8 @@ class TestGetFreeKey:
         """Test getting free key when some keys are in use."""
         jumper = Jumper()
         jumper._overlays = {
-            Offset(0, 0): JumpInfo("a", "widget1"),
-            Offset(1, 1): JumpInfo("s", "widget2"),
+            Offset(0, 0): JumpInfo("a", "widget1", "focus"),
+            Offset(1, 1): JumpInfo("s", "widget2", "focus"),
         }
         available_keys = ["a", "s", "d", "w"]
         free_key = jumper._get_free_key(available_keys)
@@ -81,8 +81,8 @@ class TestGetFreeKey:
         """Test getting free key when all keys are exhausted."""
         jumper = Jumper(keys=["a", "b"])
         jumper._overlays = {
-            Offset(0, 0): JumpInfo("a", "widget1"),
-            Offset(1, 1): JumpInfo("b", "widget2"),
+            Offset(0, 0): JumpInfo("a", "widget1", "focus"),
+            Offset(1, 1): JumpInfo("b", "widget2", "focus"),
         }
         available_keys = ["a", "b"]
         free_key = jumper._get_free_key(available_keys)
@@ -92,7 +92,7 @@ class TestGetFreeKey:
         """Test getting free key with custom key list."""
         custom_keys = ["x", "y", "z"]
         jumper = Jumper(keys=custom_keys)
-        jumper._overlays = {Offset(0, 0): JumpInfo("x", "widget1")}
+        jumper._overlays = {Offset(0, 0): JumpInfo("x", "widget1", "focus")}
         available_keys = ["x", "y", "z"]
         free_key = jumper._get_free_key(available_keys)
         assert free_key == "y"
@@ -107,14 +107,14 @@ class TestGetOverlays:
         async with app.run_test() as pilot:
             jumper = pilot.app.jumper
 
-            # Set jumpable attribute on focusable widgets
+            # Set jump_mode attribute on focusable widgets
             input1 = pilot.app.query_one("#input1", Input)
             input2 = pilot.app.query_one("#input2", Input)
             button = pilot.app.query_one("#button1", Button)
 
-            input1.jumpable = True
-            input2.jumpable = True
-            button.jumpable = True
+            input1.jump_mode = "focus"
+            input2.jump_mode = "focus"
+            button.jump_mode = "focus"
 
             # Get overlays
             jumper.get_overlays()
@@ -129,15 +129,15 @@ class TestGetOverlays:
             assert "button1" in widget_ids
 
     async def test_get_overlays_without_jumpable_attribute(self):
-        """Test get_overlays ignores widgets without jumpable attribute."""
+        """Test get_overlays ignores widgets without jump_mode attribute."""
         app = MockApp()
         async with app.run_test() as pilot:
             jumper = pilot.app.jumper
 
-            # Don't set jumpable attribute
+            # Don't set jump_mode attribute
             jumper.get_overlays()
 
-            # Should have 0 overlays (no widgets have jumpable=True)
+            # Should have 0 overlays (no widgets have jump_mode set)
             assert len(jumper._overlays) == 0
 
     async def test_get_overlays_with_custom_keys(self):
@@ -156,13 +156,13 @@ class TestGetOverlays:
         async with app.run_test() as pilot:
             jumper = pilot.app.jumper
 
-            # Set jumpable attribute
+            # Set jump_mode attribute
             for widget in [
                 pilot.app.query_one("#input1"),
                 pilot.app.query_one("#input2"),
                 pilot.app.query_one("#button1"),
             ]:
-                widget.jumpable = True
+                widget.jump_mode = "focus"
 
             jumper.get_overlays()
 
@@ -182,14 +182,14 @@ class TestGetOverlays:
         async with app.run_test() as pilot:
             jumper = pilot.app.jumper
 
-            # Set jumpable on all widgets including Label
+            # Set jump_mode on all widgets including Label
             label = pilot.app.query_one(Label)
-            label.jumpable = True
+            label.jump_mode = "focus"
 
             jumper.get_overlays()
 
             # Label is not focusable, so should not be in overlays
-            # Only 0 widgets should be there (Inputs and Button don't have jumpable=True yet)
+            # Only 0 widgets should be there (Inputs and Button don't have jump_mode set yet)
             assert len(jumper._overlays) == 0
 
     async def test_overlays_property(self):
@@ -198,9 +198,9 @@ class TestGetOverlays:
         async with app.run_test() as pilot:
             jumper = pilot.app.jumper
 
-            # Set jumpable attribute
+            # Set jump_mode attribute
             input1 = pilot.app.query_one("#input1", Input)
-            input1.jumpable = True
+            input1.jump_mode = "focus"
 
             overlays = jumper.overlays
 
@@ -222,7 +222,7 @@ class TestGetOverlays:
         app = NoIdApp()
         async with app.run_test() as pilot:
             jumper = pilot.app.jumper
-            pilot.app.no_id_input.jumpable = True
+            pilot.app.no_id_input.jump_mode = "focus"
 
             jumper.get_overlays()
 
@@ -256,7 +256,7 @@ class TestJumperMethods:
 
             # Set up some jumpable widgets
             input1 = pilot.app.query_one("#input1", Input)
-            input1.jumpable = True
+            input1.jump_mode = "focus"
 
             # Mock screen stack length
             initial_screen_count = len(pilot.app.screen_stack)
@@ -273,19 +273,21 @@ class TestJumpInfo:
 
     def test_jump_info_with_id(self):
         """Test JumpInfo with widget ID."""
-        info = JumpInfo("a", "widget1")
+        info = JumpInfo("a", "widget1", "focus")
         assert info.key == "a"
         assert info.widget == "widget1"
+        assert info.jump_mode == "focus"
 
     def test_jump_info_with_widget_reference(self):
         """Test JumpInfo with direct widget reference."""
         widget = Input()
-        info = JumpInfo("b", widget)
+        info = JumpInfo("b", widget, "click")
         assert info.key == "b"
         assert info.widget == widget
+        assert info.jump_mode == "click"
 
     def test_jump_info_immutability(self):
         """Test JumpInfo is immutable (NamedTuple property)."""
-        info = JumpInfo("a", "widget1")
+        info = JumpInfo("a", "widget1", "focus")
         with pytest.raises(AttributeError):
             info.key = "b"
