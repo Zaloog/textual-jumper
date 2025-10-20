@@ -354,3 +354,105 @@ class TestIntegration:
 
             # Should focus the button
             assert pilot.app.focused.id == "submit_btn"
+
+    async def test_jump_with_click_mode(self):
+        """Test jumping to a widget with click mode."""
+
+        class ClickModeApp(App):
+            def __init__(self, *args, **kwargs):
+                self.jumper = Jumper()
+                self.button_clicked = False
+                super().__init__(*args, **kwargs)
+
+            def compose(self) -> ComposeResult:
+                yield self.jumper
+                yield Button("Click Me", id="clickable_btn")
+
+            def on_button_pressed(self):
+                self.button_clicked = True
+
+        app = ClickModeApp()
+        async with app.run_test() as pilot:
+            # Set jump_mode to click
+            button = pilot.app.query_one("#clickable_btn", Button)
+            button.jump_mode = "click"
+
+            # Show overlay
+            pilot.app.jumper.show()
+            await pilot.pause()
+
+            # Get the key for the button
+            overlays = pilot.app.jumper.overlays
+            button_key = list(overlays.values())[0].key
+
+            # Press that key to jump and click
+            await pilot.press(button_key)
+            await pilot.pause()
+
+            # Should have dismissed overlay
+            assert not isinstance(pilot.app.screen, JumpOverlay)
+
+            # Button should have been clicked
+            assert pilot.app.button_clicked
+
+    async def test_mixed_jump_modes(self):
+        """Test that different widgets can have different jump modes."""
+
+        class MixedModeApp(App):
+            def __init__(self, *args, **kwargs):
+                self.jumper = Jumper()
+                self.button_clicked = False
+                super().__init__(*args, **kwargs)
+
+            def compose(self) -> ComposeResult:
+                yield self.jumper
+                yield Input(id="focus_input")
+                yield Button("Click Me", id="click_btn")
+
+            def on_button_pressed(self):
+                self.button_clicked = True
+
+        app = MixedModeApp()
+        async with app.run_test() as pilot:
+            # Set different jump modes
+            pilot.app.query_one("#focus_input").jump_mode = "focus"
+            pilot.app.query_one("#click_btn").jump_mode = "click"
+
+            # Show overlay
+            pilot.app.jumper.show()
+            await pilot.pause()
+
+            # Get overlays
+            overlays = pilot.app.jumper.overlays
+
+            # Find keys for each widget
+            input_key = None
+            button_key = None
+            for info in overlays.values():
+                if info.widget == "focus_input":
+                    input_key = info.key
+                    assert info.jump_mode == "focus"
+                elif info.widget == "click_btn":
+                    button_key = info.key
+                    assert info.jump_mode == "click"
+
+            assert input_key is not None
+            assert button_key is not None
+
+            # Test focus mode first
+            await pilot.press(input_key)
+            await pilot.pause()
+
+            # Should have focused the input
+            assert pilot.app.focused.id == "focus_input"
+
+            # Show overlay again
+            pilot.app.jumper.show()
+            await pilot.pause()
+
+            # Test click mode
+            await pilot.press(button_key)
+            await pilot.pause()
+
+            # Button should have been clicked
+            assert pilot.app.button_clicked

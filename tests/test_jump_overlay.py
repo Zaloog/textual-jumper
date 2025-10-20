@@ -393,3 +393,73 @@ class TestJumpOverlay:
 
             # Should have dismissed the overlay (graceful handling)
             assert not isinstance(pilot.app.screen, JumpOverlay)
+
+    async def test_jump_overlay_click_mode_button(self):
+        """Test that click mode simulates a click on a button."""
+        from textual.widgets import Button
+
+        class TestApp(App):
+            def __init__(self, *args, **kwargs):
+                self.button_clicked = False
+                super().__init__(*args, **kwargs)
+
+            def compose(self) -> ComposeResult:
+                yield Button("Test Button", id="test_btn")
+
+            def on_button_pressed(self):
+                self.button_clicked = True
+
+            def on_mount(self):
+                overlays = {
+                    Offset(0, 0): JumpInfo("a", "test_btn", "click"),
+                }
+                self.push_screen(JumpOverlay(overlays))
+
+        app = TestApp()
+        async with app.run_test() as pilot:
+            # Should be on overlay screen
+            assert isinstance(pilot.app.screen, JumpOverlay)
+
+            # Press the jump key
+            await pilot.press("a")
+            await pilot.pause()
+
+            # Should have dismissed overlay
+            assert not isinstance(pilot.app.screen, JumpOverlay)
+
+            # Button should have been clicked
+            assert pilot.app.button_clicked
+
+    async def test_jump_overlay_click_mode_with_direct_widget_reference(self):
+        """Test that click mode works with direct widget reference."""
+        from textual.widgets import Button
+
+        class TestApp(App):
+            def __init__(self, *args, **kwargs):
+                self.button_clicked = False
+                self.test_button = Button("Test Button")
+                super().__init__(*args, **kwargs)
+
+            def compose(self) -> ComposeResult:
+                yield self.test_button
+
+            def on_button_pressed(self):
+                self.button_clicked = True
+
+            def on_mount(self):
+                overlays = {
+                    Offset(0, 0): JumpInfo("a", self.test_button, "click"),
+                }
+                self.push_screen(JumpOverlay(overlays))
+
+        app = TestApp()
+        async with app.run_test() as pilot:
+            # Press the jump key
+            await pilot.press("a")
+            await pilot.pause()
+
+            # Should have dismissed overlay
+            assert not isinstance(pilot.app.screen, JumpOverlay)
+
+            # Button should have been clicked
+            assert pilot.app.button_clicked
