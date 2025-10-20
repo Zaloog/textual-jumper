@@ -57,8 +57,8 @@ class TestJumpOverlay:
     def test_jump_overlay_initialization(self):
         """Test JumpOverlay initializes with overlays dict."""
         overlays = {
-            Offset(0, 0): JumpInfo("a", "widget1"),
-            Offset(10, 5): JumpInfo("s", "widget2"),
+            Offset(0, 0): JumpInfo("a", "widget1", "focus"),
+            Offset(10, 5): JumpInfo("s", "widget2", "focus"),
         }
         screen = JumpOverlay(overlays)
         assert screen.overlays == overlays
@@ -71,9 +71,9 @@ class TestJumpOverlay:
     async def test_jump_overlay_compose_creates_labels(self):
         """Test JumpOverlay compose yields LetterLabel for each overlay."""
         overlays = {
-            Offset(0, 0): JumpInfo("a", "widget1"),
-            Offset(10, 5): JumpInfo("s", "widget2"),
-            Offset(20, 15): JumpInfo("d", "widget3"),
+            Offset(0, 0): JumpInfo("a", "widget1", "focus"),
+            Offset(10, 5): JumpInfo("s", "widget2", "focus"),
+            Offset(20, 15): JumpInfo("d", "widget3", "focus"),
         }
 
         class TestApp(App):
@@ -97,8 +97,8 @@ class TestJumpOverlay:
     async def test_jump_overlay_labels_have_correct_offsets(self):
         """Test LetterLabels in JumpOverlay have correct offsets."""
         overlays = {
-            Offset(5, 10): JumpInfo("a", "widget1"),
-            Offset(15, 20): JumpInfo("s", "widget2"),
+            Offset(5, 10): JumpInfo("a", "widget1", "focus"),
+            Offset(15, 20): JumpInfo("s", "widget2", "focus"),
         }
 
         class TestApp(App):
@@ -121,7 +121,7 @@ class TestJumpOverlay:
 
     async def test_jump_overlay_has_escape_binding(self):
         """Test JumpOverlay has escape key binding."""
-        overlays = {Offset(0, 0): JumpInfo("a", "widget1")}
+        overlays = {Offset(0, 0): JumpInfo("a", "widget1", "focus")}
 
         class TestApp(App):
             def compose(self) -> ComposeResult:
@@ -150,7 +150,7 @@ class TestJumpOverlay:
 
     async def test_jump_overlay_escape_closes_screen(self):
         """Test pressing escape closes the JumpOverlay screen."""
-        overlays = {Offset(0, 0): JumpInfo("a", "widget1")}
+        overlays = {Offset(0, 0): JumpInfo("a", "widget1", "focus")}
 
         class TestApp(App):
             def compose(self) -> ComposeResult:
@@ -174,7 +174,7 @@ class TestJumpOverlay:
         """Test JumpOverlay is a ModalScreen."""
         from textual.screen import ModalScreen
 
-        overlays = {Offset(0, 0): JumpInfo("a", "widget1")}
+        overlays = {Offset(0, 0): JumpInfo("a", "widget1", "focus")}
 
         class TestApp(App):
             def compose(self) -> ComposeResult:
@@ -192,7 +192,7 @@ class TestJumpOverlay:
         """Test JumpOverlay works with direct widget references."""
         widget = Input()
         overlays = {
-            Offset(0, 0): JumpInfo("a", widget),
+            Offset(0, 0): JumpInfo("a", widget, "focus"),
         }
 
         class TestApp(App):
@@ -212,10 +212,10 @@ class TestJumpOverlay:
     async def test_jump_overlay_multiple_keys(self):
         """Test JumpOverlay with multiple different keys."""
         overlays = {
-            Offset(0, 0): JumpInfo("q", "widget1"),
-            Offset(10, 10): JumpInfo("w", "widget2"),
-            Offset(20, 20): JumpInfo("e", "widget3"),
-            Offset(30, 30): JumpInfo("r", "widget4"),
+            Offset(0, 0): JumpInfo("q", "widget1", "focus"),
+            Offset(10, 10): JumpInfo("w", "widget2", "focus"),
+            Offset(20, 20): JumpInfo("e", "widget3", "focus"),
+            Offset(30, 30): JumpInfo("r", "widget4", "focus"),
         }
 
         class TestApp(App):
@@ -238,8 +238,8 @@ class TestJumpOverlay:
     async def test_jump_overlay_key_press_jumps_to_widget(self):
         """Test pressing a jump key focuses the corresponding widget."""
         overlays = {
-            Offset(0, 0): JumpInfo("a", "widget1"),
-            Offset(10, 10): JumpInfo("s", "widget2"),
+            Offset(0, 0): JumpInfo("a", "widget1", "focus"),
+            Offset(10, 10): JumpInfo("s", "widget2", "focus"),
         }
 
         class TestApp(App):
@@ -266,7 +266,7 @@ class TestJumpOverlay:
     async def test_jump_overlay_invalid_key_does_nothing(self):
         """Test pressing an invalid key doesn't dismiss the overlay."""
         overlays = {
-            Offset(0, 0): JumpInfo("a", "widget1"),
+            Offset(0, 0): JumpInfo("a", "widget1", "focus"),
         }
 
         class TestApp(App):
@@ -301,7 +301,7 @@ class TestJumpOverlay:
 
             def on_mount(self):
                 overlays = {
-                    Offset(0, 0): JumpInfo("a", self.input_widget),
+                    Offset(0, 0): JumpInfo("a", self.input_widget, "focus"),
                 }
                 self.push_screen(JumpOverlay(overlays), self.set_focus)
 
@@ -318,9 +318,9 @@ class TestJumpOverlay:
     async def test_jump_overlay_multiple_keys_correct_widget(self):
         """Test that pressing different keys jumps to correct widgets."""
         overlays = {
-            Offset(0, 0): JumpInfo("a", "first"),
-            Offset(10, 10): JumpInfo("s", "second"),
-            Offset(20, 20): JumpInfo("d", "third"),
+            Offset(0, 0): JumpInfo("a", "first", "focus"),
+            Offset(10, 10): JumpInfo("s", "second", "focus"),
+            Offset(20, 20): JumpInfo("d", "third", "focus"),
         }
 
         class TestApp(App):
@@ -344,7 +344,7 @@ class TestJumpOverlay:
     async def test_jump_overlay_non_character_key_ignored(self):
         """Test that non-character keys (like arrows, F-keys) are ignored."""
         overlays = {
-            Offset(0, 0): JumpInfo("a", "widget1"),
+            Offset(0, 0): JumpInfo("a", "widget1", "focus"),
         }
 
         class TestApp(App):
@@ -372,7 +372,7 @@ class TestJumpOverlay:
     async def test_jump_overlay_widget_not_found(self):
         """Test that jumping to a non-existent widget ID dismisses overlay gracefully."""
         overlays = {
-            Offset(0, 0): JumpInfo("a", "nonexistent_widget"),
+            Offset(0, 0): JumpInfo("a", "nonexistent_widget", "focus"),
         }
 
         class TestApp(App):

@@ -41,10 +41,10 @@ class TestIntegration:
         """Test the complete workflow of showing overlay and jumping."""
         app = IntegrationTestApp()
         async with app.run_test() as pilot:
-            # Set jumpable on all inputs and buttons
+            # Set jump_mode on all inputs and buttons
             for widget in pilot.app.query(Input).results():
-                widget.jumpable = True
-            pilot.app.query_one("#submit_btn", Button).jumpable = True
+                widget.jump_mode = "focus"
+            pilot.app.query_one("#submit_btn", Button).jump_mode = "focus"
 
             # Trigger the jump overlay
             await pilot.press("ctrl+o")
@@ -66,7 +66,7 @@ class TestIntegration:
         async with app.run_test() as pilot:
             # Set jumpable
             for widget in pilot.app.query(Input).results():
-                widget.jumpable = True
+                widget.jump_mode = "focus"
 
             # Get overlays
             overlays = pilot.app.jumper.overlays
@@ -94,9 +94,9 @@ class TestIntegration:
         app = CustomApp()
         async with app.run_test() as pilot:
             # Set jumpable
-            pilot.app.query_one("#name").jumpable = True
-            pilot.app.query_one("#email").jumpable = True
-            pilot.app.query_one("#submit_btn").jumpable = True
+            pilot.app.query_one("#name").jump_mode = "focus"
+            pilot.app.query_one("#email").jump_mode = "focus"
+            pilot.app.query_one("#submit_btn").jump_mode = "focus"
 
             # Get overlays
             overlays = pilot.app.jumper.overlays
@@ -113,7 +113,7 @@ class TestIntegration:
         async with app.run_test() as pilot:
             # Set jumpable on nested inputs
             for widget in pilot.app.query(Input).results():
-                widget.jumpable = True
+                widget.jump_mode = "focus"
 
             overlays = pilot.app.jumper.overlays
 
@@ -130,7 +130,7 @@ class TestIntegration:
         app = IntegrationTestApp()
         async with app.run_test() as pilot:
             # Only set jumpable on one widget
-            pilot.app.query_one("#name").jumpable = True
+            pilot.app.query_one("#name").jump_mode = "focus"
 
             overlays = pilot.app.jumper.overlays
 
@@ -144,7 +144,7 @@ class TestIntegration:
         app = IntegrationTestApp()
         async with app.run_test() as pilot:
             # Set jumpable
-            pilot.app.query_one("#name").jumpable = True
+            pilot.app.query_one("#name").jump_mode = "focus"
 
             # Show overlay
             await pilot.press("ctrl+o")
@@ -172,14 +172,14 @@ class TestIntegration:
         app = IntegrationTestApp()
         async with app.run_test() as pilot:
             # Initially, only one widget is jumpable
-            pilot.app.query_one("#name").jumpable = True
+            pilot.app.query_one("#name").jump_mode = "focus"
 
             # Get overlays
             overlays1 = pilot.app.jumper.overlays
             assert len(overlays1) == 1
 
             # Make another widget jumpable
-            pilot.app.query_one("#email").jumpable = True
+            pilot.app.query_one("#email").jump_mode = "focus"
 
             # Get overlays again
             overlays2 = pilot.app.jumper.overlays
@@ -190,8 +190,8 @@ class TestIntegration:
         app = IntegrationTestApp()
         async with app.run_test() as pilot:
             # Set jumpable on different widget types
-            pilot.app.query_one("#name", Input).jumpable = True
-            pilot.app.query_one("#submit_btn", Button).jumpable = True
+            pilot.app.query_one("#name", Input).jump_mode = "focus"
+            pilot.app.query_one("#submit_btn", Button).jump_mode = "focus"
 
             overlays = pilot.app.jumper.overlays
 
@@ -220,8 +220,8 @@ class TestIntegration:
         app = NoIdApp()
         async with app.run_test() as pilot:
             # Set jumpable on both
-            pilot.app.query_one("#with_id").jumpable = True
-            pilot.app.input_no_id.jumpable = True
+            pilot.app.query_one("#with_id").jump_mode = "focus"
+            pilot.app.input_no_id.jump_mode = "focus"
 
             overlays = pilot.app.jumper.overlays
 
@@ -252,7 +252,7 @@ class TestIntegration:
         async with app.run_test() as pilot:
             # Set jumpable on all 3 inputs
             for widget in pilot.app.query(Input).results():
-                widget.jumpable = True
+                widget.jump_mode = "focus"
 
             overlays = pilot.app.jumper.overlays
 
@@ -277,9 +277,9 @@ class TestIntegration:
         app = IntegrationTestApp()
         async with app.run_test() as pilot:
             # Set jumpable
-            pilot.app.query_one("#name").jumpable = True
-            pilot.app.query_one("#email").jumpable = True
-            pilot.app.query_one("#phone").jumpable = True
+            pilot.app.query_one("#name").jump_mode = "focus"
+            pilot.app.query_one("#email").jump_mode = "focus"
+            pilot.app.query_one("#phone").jump_mode = "focus"
 
             # Show overlay
             await pilot.press("ctrl+o")
@@ -311,7 +311,7 @@ class TestIntegration:
         app = IntegrationTestApp()
         async with app.run_test() as pilot:
             # Set jumpable
-            pilot.app.query_one("#name").jumpable = True
+            pilot.app.query_one("#name").jump_mode = "focus"
 
             # Focus name initially
             pilot.app.query_one("#name").focus()
@@ -338,7 +338,7 @@ class TestIntegration:
         app = IntegrationTestApp()
         async with app.run_test() as pilot:
             # Only make button jumpable
-            pilot.app.query_one("#submit_btn").jumpable = True
+            pilot.app.query_one("#submit_btn").jump_mode = "focus"
 
             # Show overlay
             await pilot.press("ctrl+o")

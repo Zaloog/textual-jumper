@@ -6,7 +6,7 @@ if TYPE_CHECKING:
 
 from rich.text import Text
 from textual.binding import Binding
-from textual.events import Key
+from textual.events import Click, Key
 from textual.geometry import Offset
 from textual.reactive import reactive
 from textual.screen import ModalScreen
@@ -117,5 +117,27 @@ class JumpOverlay(ModalScreen):
                 self.dismiss()
                 return
 
-        # Dismiss the screen with the widget as return value
-        self.dismiss(widget)
+        # Handle based on jump mode
+        if jump_info.jump_mode == "click":
+            # Simulate a click on the widget
+            # Get widget's region to calculate click coordinates
+            region = widget.region
+            # Create a click event at the center of the widget
+            click_event = Click(
+                widget=widget,
+                x=region.x + region.width // 2,
+                y=region.y + region.height // 2,
+                delta_x=0,
+                delta_y=0,
+                button=1,  # Left mouse button
+                shift=False,
+                meta=False,
+                ctrl=False,
+                screen_x=region.x + region.width // 2,
+                screen_y=region.y + region.height // 2,
+            )
+            widget.post_message(click_event)
+            self.dismiss()
+        else:
+            # Focus mode - dismiss with the widget as return value
+            self.dismiss(widget)

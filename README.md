@@ -50,7 +50,7 @@ Press `Ctrl+O` to activate jump mode, then press a key to jump to that widget!
 
 ```python
 from textual.app import App, ComposeResult
-from textual.widgets import Input, Header, Footer
+from textual.widgets import Input, Button, Header, Footer
 from textual_jumper import Jumper
 
 class MyApp(App):
@@ -60,13 +60,19 @@ class MyApp(App):
         yield Header()
         yield Jumper()
 
+        # Focus mode - widget will receive focus
         name_input = Input(placeholder="Name")
-        name_input.jumpable = True
+        name_input.jump_mode = "focus"
         yield name_input
 
         email_input = Input(placeholder="Email")
-        email_input.jumpable = True
+        email_input.jump_mode = "focus"
         yield email_input
+
+        # Click mode - widget will be clicked
+        submit_button = Button("Submit")
+        submit_button.jump_mode = "click"
+        yield submit_button
 
         yield Footer()
 
@@ -103,6 +109,28 @@ Input 4   [w]     Input 8   [ja]
 ```
 
 Smart allocation strategy ensures no conflicts between single and multi-character keys.
+
+## Jump Modes
+
+Textual Jumper supports two jump modes for different widget interactions:
+
+### Focus Mode
+
+Widgets with `jump_mode = "focus"` will receive focus when jumped to. This is ideal for input fields, text areas, and other widgets where you want to interact with them directly.
+
+```python
+name_input = Input(placeholder="Name")
+name_input.jump_mode = "focus"
+```
+
+### Click Mode
+
+Widgets with `jump_mode = "click"` will be clicked automatically when jumped to. This is perfect for buttons, links, and other widgets that trigger actions.
+
+```python
+submit_button = Button("Submit")
+submit_button.jump_mode = "click"
+```
 
 ## Configuration
 
