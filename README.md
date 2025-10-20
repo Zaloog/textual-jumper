@@ -112,7 +112,7 @@ Smart allocation strategy ensures no conflicts between single and multi-characte
 
 ## Jump Modes
 
-Textual Jumper supports two jump modes for different widget interactions:
+textual-jumper supports two jump modes for different widget interactions:
 
 ### Focus Mode
 
@@ -125,12 +125,15 @@ name_input.jump_mode = "focus"
 
 ### Click Mode
 
-Widgets with `jump_mode = "click"` will be clicked automatically when jumped to. This is perfect for buttons, links, and other widgets that trigger actions.
+Widgets with `jump_mode = "click"` will be clicked automatically when jumped to. This is perfect for Buttons, Selects, and other widgets that trigger actions.
 
 ```python
 submit_button = Button("Submit")
 submit_button.jump_mode = "click"
 ```
+
+Also the Widget you want to jump to needs to be focusable, so `Widget.can_focus = True` must be set, if the widget is not focusable
+by default.
 
 ## Configuration
 
