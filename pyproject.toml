@@ -1,6 +1,6 @@
 [project]
 name = "textual-jumper"
-version = "0.2.0"
+version = "0.2.1"
 description = "A keyboard-driven navigation widget for Textual TUI applications"
 readme = "README.md"
 authors = [

@@ -1,6 +1,8 @@
 from collections.abc import Iterator
 from typing import TYPE_CHECKING, Any
 
+from textual.css.query import NoMatches
+
 if TYPE_CHECKING:
     from textual_jumper.jumper import JumpInfo
 
@@ -111,8 +113,12 @@ class JumpOverlay(ModalScreen):
         else:
             # Widget ID - query for it
             try:
-                widget = self.app.query_one(f"#{jump_info.widget}")
-            except Exception:
+                latest_screen = self.app.screen_stack[-2]
+                widget = latest_screen.query_one(f"#{jump_info.widget}")
+            except NoMatches:
+                self.notify(
+                    f"Widget with Id: {jump_info.widget} not found on Screen: {latest_screen}", severity="error"
+                )
                 # Widget not found, just dismiss
                 self.dismiss()
                 return
